@@ -142,6 +142,12 @@ def get_agent_config(model_type):
             "model_config": ChatGPTConfig().as_dict(),
             "model_platform": ModelPlatformType.OPENAI,
         }
+    elif model_type == 'gpt-5':
+        agent_config = {
+            "model_type": ModelType.GPT_5,
+            "model_config": ChatGPTConfig().as_dict(),
+            "model_platform": ModelPlatformType.OPENAI,
+        }
     elif model_type == 'vllm_qwen_vl':
         agent_config = {
             "model_type": "Qwen/Qwen2.5-VL-7B-Instruct",
@@ -156,6 +162,12 @@ def get_agent_config(model_type):
             "model_config": VLLMConfig().as_dict(),
             "url": 'http://localhost:8000/v1',
         }
+    elif model_type == 'openrouter_qwen_72b':
+        agent_config = {
+            'model_type': ModelType.OPENROUTER_QWEN_2_5_72B,
+            'model_platform': ModelPlatformType.OPENROUTER,
+            'model_config': OpenRouterConfig().as_dict(),
+        }
     elif model_type == 'openrouter_qwen_vl_72b':
         agent_config = {
             'model_type': ModelType.OPENROUTER_QWEN_2_5_VL_72B,
@@ -165,6 +177,12 @@ def get_agent_config(model_type):
     elif model_type == 'openrouter_qwen_vl_7b':
         agent_config = {
             'model_type': ModelType.OPENROUTER_QWEN_2_5_VL_7B,
+            'model_platform': ModelPlatformType.OPENROUTER,
+            'model_config': OpenRouterConfig().as_dict(),
+        }
+    elif model_type == 'openrouter_qwen_7b':
+        agent_config = {
+            'model_type': ModelType.OPENROUTER_QWEN_2_5_7B,
             'model_platform': ModelPlatformType.OPENROUTER,
             'model_config': OpenRouterConfig().as_dict(),
         }

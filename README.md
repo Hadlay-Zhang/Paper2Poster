@@ -1,16 +1,32 @@
 # 🎓Paper2Poster: Multimodal Poster Automation from Scientific Papers
+# 从学术论文自动生成学术海报
 
 <p align="center">
   <a href="https://arxiv.org/abs/2505.21497" target="_blank"><img src="https://img.shields.io/badge/arXiv-2505.21497-red"></a>
   <a href="https://paper2poster.github.io/" target="_blank"><img src="https://img.shields.io/badge/Project-Page-brightgreen"></a>
   <a href="https://huggingface.co/datasets/Paper2Poster/Paper2Poster" target="_blank"><img src="https://img.shields.io/badge/%F0%9F%A4%97%20Hugging%20Face-Dataset-orange"></a>
   <a href="https://huggingface.co/papers/2505.21497" target="_blank"><img src="https://img.shields.io/badge/%F0%9F%A4%97%20Hugging%20Face-Daily Papers-red"></a>
-  <a href="https://x.com/_akhaliq/status/1927721150584390129" target="_blank"><img alt="X (formerly Twitter) URL" src="https://img.shields.io/twitter/url?url=https%3A%2F%2Fx.com%2F_akhaliq%2Fstatus%2F1927721150584390129"></a>    
+  <a href="https://x.com/_akhaliq/status/1927721150584390129" target="_blank"><img alt="X (formerly Twitter) URL" src="https://img.shields.io/twitter/url?url=https%3A%2F%2Fx.com%2F_akhaliq%2Fstatus%2F1927721150584390129"></a>
+  <a href="https://huggingface.co/spaces/camel-ai/Paper2Poster" target="_blank"> <img src="https://img.shields.io/badge/%F0%9F%A4%97%20Hugging%20Face-Spaces%20Demo-blue"> </a>
 </p>
 
 We address **How to create a poster from a paper** and **How to evaluate poster.**
 
 ![Overview](./assets/overall.png)
+
+
+## 🤩 Paper2Poster for Paper2Poster
+
+![Overview](./assets/teaser.jpeg)
+
+## 🔥 Update
+- [x] [2025.10.7] Check out follow-up **[Paper2Video](https://github.com/showlab/Paper2Video)**.
+- [x] [2025.11.3] Added **Gradio demo** support.
+- [x] [2025.10.18] Added **Docker** support.
+- [x] [2025.10.13] Added automatic **logo support** for conferences and institutions, **YAML-based style customization**, a new default theme.
+- [x] [2025.9.18] Paper2Poster has been accepted to **NeurIPS 2025 Dataset and Benchmark Track**.
+- [x] [2025.9.3]  We now support generate per section content in **parallel** for faster generation, by simply specifying `--max_workers`.
+- [x] [2025.5.27] We release the [arXiv](https://arxiv.org/abs/2505.21497), [code](https://github.com/Paper2Poster/Paper2Poster) and [`dataset`](https://huggingface.co/datasets/Paper2Poster/Paper2Poster)
 
 <!--## 📚 Introduction-->
 
@@ -28,6 +44,7 @@ We address **How to create a poster from a paper** and **How to evaluate poster.
 
 <!--- [📚 Introduction](#-introduction)-->
 - [🛠️ Installation](#-installation)
+- [🐳 Docker Deployment](#-docker-deployment)
 - [🚀 Quick Start](#-quick-start)
 - [🔮 Evaluation](#-evaluation)
 ---
@@ -59,6 +76,49 @@ Create a `.env` file in the project root and add your OpenAI API key:
 ```bash
 OPENAI_API_KEY=<your_openai_api_key>
 ```
+
+**Optional: Google Search API (for logo search)**
+
+To use Google Custom Search for more reliable logo search, add these to your `.env` file:
+
+```bash
+GOOGLE_SEARCH_API_KEY=<your_google_search_api_key>
+GOOGLE_SEARCH_ENGINE_ID=<your_search_engine_id>
+```
+
+---
+
+## 🐳 Docker Deployment
+
+For easier deployment, you can use Docker to run Paper2Poster without manual dependency installation.
+
+**Build the Docker image:**
+```bash
+docker build -t paper2poster .
+```
+
+**Troubleshooting:**
+- If you get a "permission denied" error when running Docker commands, use `sudo` before Docker commands (e.g., `sudo docker build -t paper2poster .`)
+
+**Example:**
+```bash
+# Create output directory if it doesn't exist
+mkdir -p <4o_4o>_generated_posters
+
+docker run --rm \
+-e OPENAI_API_KEY=<your_openai_api_key> \
+-v "$(pwd)/Paper2Poster-data:/Paper2Poster-data" \
+-v "$(pwd)/<4o_4o>_generated_posters:/app/<4o_4o>_generated_posters" \
+paper2poster \
+python -m PosterAgent.new_pipeline \
+--poster_path="/Paper2Poster-data/<paper_name>/paper.pdf" \
+--model_name_t=4o \
+--model_name_v=4o \
+--poster_width_inches=48 \
+--poster_height_inches=36
+```
+
+The generated poster will be saved in `<4o_4o>_generated_posters/Paper2Poster-data/paper_name/poster.pptx` on your host machine.
 
 ---
 
@@ -106,6 +166,39 @@ python -m PosterAgent.new_pipeline \
 ```
 
 PosterAgent **supports flexible combination of LLM / VLM**, feel free to try other options, or customize your own settings in `get_agent_config()` in [`utils/wei_utils.py`](utils/wei_utils.py).
+
+### Adding Logos to Posters
+
+You can automatically add institutional and conference logos to your posters:
+
+```bash
+python -m PosterAgent.new_pipeline \
+    --poster_path="${dataset_dir}/${paper_name}/paper.pdf" \
+    --model_name_t="4o" \
+    --model_name_v="4o" \
+    --poster_width_inches=48 \
+    --poster_height_inches=36 \
+    --conference_venue="NeurIPS"  # Automatically searches for conference logo
+```
+
+**Logo Search Strategy:**
+1. **Local search**: First checks the provided logo store (`logo_store/institutes/` and `logo_store/conferences/`)
+2. **Web search**: If not found locally, performs online search
+   - By default, uses DuckDuckGo (no API key required)
+   - For more reliable results, use `--use_google_search` (requires `GOOGLE_SEARCH_API_KEY` and `GOOGLE_SEARCH_ENGINE_ID` in `.env`)
+
+You can also specify custom logo paths to skip auto-detection:
+```bash
+--institution_logo_path="path/to/institution_logo.png" \
+--conference_logo_path="path/to/conference_logo.png"
+```
+
+### YAML Style Customization
+
+Customize poster appearance via YAML configuration files:
+- **Global defaults**: `config/poster.yaml` (applies to all posters)
+- **Per-poster override**: Place `poster.yaml` next to your `paper.pdf` for custom styling
+
 
 ## 🔮 Evaluation
 Download Paper2Poster evaluation dataset via:
